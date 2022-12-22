@@ -25,13 +25,20 @@
     const eventHandlers = {
       ["{{providers.id}}"] : {
       containerSelector: "#{{markets.id}}Container",
-      initialSelectTemplateContext: {
+      childDependentSelects: [{
+        containerSelector: "#{{symbols.id}}Container",
+        selectTemplateContext: {
+          label: "{{symbols.label}}",
+          id: "{{symbols.id}}",
+          name: "{{symbols.name}}",
+          blankOptionDisplay: "{{symbols.blankOptionDisplay}}"
+        }
+      }],
+      selectTemplateContext: {
         label: "{{markets.label}}",
         id: "{{markets.id}}",
         name: "{{markets.name}}",
-        loading: true,
-        blankOptionDisplay: "{{markets.blankOptionDisplay}}",
-        options: []
+        blankOptionDisplay: "{{markets.blankOptionDisplay}}"
       },
       templateName: "select",
       apiUrlFn: (provider) => {
@@ -40,13 +47,11 @@
     },
       ["{{markets.id}}"]: {
       containerSelector: "#{{symbols.id}}Container",
-      initialSelectTemplateContext: {
+      selectTemplateContext: {
         label: "{{symbols.label}}",
         id: "{{symbols.id}}",
         name: "{{symbols.name}}",
-        blankOptionDisplay: "{{symbols.blankOptionDisplay}}",
-        loading: true,
-        options: []
+        blankOptionDisplay: "{{symbols.blankOptionDisplay}}"
       },
       templateName: "select",
       apiUrlFn: (marketType) => {
@@ -59,18 +64,31 @@
     $("#createAlertForm").change(function(event) {
       const target = event.target;
       if ( eventHandlers[target.id]) {
-       const { containerSelector, initialSelectTemplateContext, templateName, apiUrlFn } = eventHandlers[target.id];
-       const emptySelectHtml = Handlebars.templates[templateName](initialSelectTemplateContext);
-          $(containerSelector).html(emptySelectHtml);
-          const selectedValue = $(target).find("option:selected").attr('value');
-          const apiUrl = apiUrlFn(selectedValue);
-          $.get(apiUrl, (data, status) => {
-            initialSelectTemplateContext.options = data.options;
-            initialSelectTemplateContext.loading = false;
-            const selectHtml = Handlebars.templates[templateName](initialSelectTemplateContext);
-            $(containerSelector).html(selectHtml);
-     });
-    }
+        const { containerSelector, selectTemplateContext, childDependentSelects, templateName, apiUrlFn } = eventHandlers[target.id];
+        selectTemplateContext.loading = true;
+        selectTemplateContext.options = [];
+        const emptySelectHtml = Handlebars.templates[templateName](selectTemplateContext);
+        $(containerSelector).html(emptySelectHtml);
+
+        if (Array.isArray(childDependentSelects)) {
+          childDependentSelects.forEach((select) => {
+            const { containerSelector: depContainerSelector, selectTemplateContext: depSelectTemplateContext } = select;
+            depSelectTemplateContext.options = [];
+            const depSelectHtml = Handlebars.templates[templateName](depSelectTemplateContext);
+            $(depContainerSelector).html(depSelectHtml);
+          });
+        } 
+        
+        const selectedValue = $(target).find("option:selected").attr('value');
+        const apiUrl = apiUrlFn(selectedValue);
+        $.get(apiUrl, (data, status) => {
+      
+          selectTemplateContext.options = data.options;
+          selectTemplateContext.loading = false;
+          const selectHtml = Handlebars.templates[templateName](selectTemplateContext);
+          $(containerSelector).html(selectHtml);
+        });
+      }
     });
   });
 </script>
