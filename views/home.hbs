@@ -1,0 +1,76 @@
+<div class="row">
+  <div class="d-flex justify-content-center">
+    <form method="POST" action="/" id="createAlertForm">
+      <fieldset>
+        <legend>Subscribe to a price alert</legend>
+        {{> select providers}}
+        {{> select markets}}
+        {{> select symbols}}
+        <div class="form-group">
+          <label for="alertprice" class="form-label mt-4">Alert Price</label>
+          <input type="number" class="form-control" id="alertprice" name="alertprice">
+        </div>
+        <div class="form-group">
+          <label for="email" class="form-label mt-4">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter email">
+          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </fieldset>
+    </form>  
+  </div>
+</div>
+<script>
+  $(document).ready(function(){
+    const eventHandlers = {
+      ["{{providers.id}}"] : {
+      containerSelector: "#{{markets.id}}Container",
+      initialSelectTemplateContext: {
+        label: "{{markets.label}}",
+        id: "{{markets.id}}",
+        name: "{{markets.name}}",
+        loading: true,
+        blankOptionDisplay: "{{markets.blankOptionDisplay}}",
+        options: []
+      },
+      templateName: "select",
+      apiUrlFn: (provider) => {
+        return `${window.location.origin}/markets/${provider}`;
+      }
+    },
+      ["{{markets.id}}"]: {
+      containerSelector: "#{{symbols.id}}Container",
+      initialSelectTemplateContext: {
+        label: "{{symbols.label}}",
+        id: "{{symbols.id}}",
+        name: "{{symbols.name}}",
+        blankOptionDisplay: "{{symbols.blankOptionDisplay}}",
+        loading: true,
+        options: []
+      },
+      templateName: "select",
+      apiUrlFn: (marketType) => {
+        const provider = $("#{{providers.id}}").find("option:selected").attr('value');
+        console.log(`${window.location.origin}/symbols/${provider}/${marketType}`);
+        return `${window.location.origin}/symbols/${provider}/${marketType}`;
+      }
+    }
+    };
+    $("#createAlertForm").change(function(event) {
+      const target = event.target;
+      if ( eventHandlers[target.id]) {
+       const { containerSelector, initialSelectTemplateContext, templateName, apiUrlFn } = eventHandlers[target.id];
+       const emptySelectHtml = Handlebars.templates[templateName](initialSelectTemplateContext);
+          $(containerSelector).html(emptySelectHtml);
+          const selectedValue = $(target).find("option:selected").attr('value');
+          const apiUrl = apiUrlFn(selectedValue);
+          $.get(apiUrl, (data, status) => {
+            initialSelectTemplateContext.options = data.options;
+            initialSelectTemplateContext.loading = false;
+            const selectHtml = Handlebars.templates[templateName](initialSelectTemplateContext);
+            $(containerSelector).html(selectHtml);
+     });
+    }
+    });
+  });
+</script>

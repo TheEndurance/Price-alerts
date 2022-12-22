@@ -1,0 +1,16 @@
+<div class="select-container" id="{{id}}Container">
+  <div class="form-group">
+    <label for={{id}} class="form-label mt-4">{{label}}</label>
+    <select class="form-select" id={{id}} name={{name}}>
+      {{#if blankOptionDisplay}}
+        <option disabled selected value>{{blankOptionDisplay}}</option>
+      {{/if}}
+      {{#each options}}
+        <option value={{this.value}}>{{this.display}}</option>
+      {{/each}}       
+    </select>
+  </div>
+  {{#if loading}}
+    <div class="select-loading-spinner spinner-border text-info"></div>
+  {{/if}}
+</div>
