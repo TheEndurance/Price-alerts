@@ -1,0 +1,11 @@
+- add other providers
+- fire alerts based off provider, market type and ticker
+- create generic provider factory to abstract specific details of a provider
+- fetch providers for select
+- fetch market types from selected providers
+- fetch tickers for the chosen provider and market types
+- form validation
+- error messages for the alerts form
+- user signup/login - auth
+- manage/view existing alerts
+- sms 

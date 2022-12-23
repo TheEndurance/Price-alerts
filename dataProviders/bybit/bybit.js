@@ -3,7 +3,7 @@ import { WebsocketClient, InverseClient, LinearClient } from 'bybit-api';
 const API_KEY = '';
 const PRIVATE_KEY = '';
 
-const wsConfig = {
+const linearlinearWebsocketConfig = {
   key: API_KEY,
   secret: PRIVATE_KEY,
 
@@ -28,7 +28,7 @@ const wsConfig = {
   // how long to wait (in ms) before deciding the connection should be terminated & reconnected
   // pongTimeout: 1000,
 
-  // how often to check (in ms) that WS connection is still alive
+  // how often to check (in ms) that linearWebsocket connection is still alive
   // pingInterval: 10000,
 
   // how long to wait before attempting to reconnect (in ms) after connection is closed
@@ -41,37 +41,37 @@ const wsConfig = {
   // requestOptions: { }
 
   // override which URL to use for websocket connections
-  // wsUrl: 'wss://stream.bytick.com/realtime'
+  // linearWebsocketUrl: 'linearWebsockets://stream.bytick.com/realtime'
 };
 
-const ws = new WebsocketClient(wsConfig);
+const linearWebsocket = new WebsocketClient(linearlinearWebsocketConfig);
 
 // subscribe to multiple topics at once
-// ws.subscribe(['position', 'execution', 'trade']);
+// linearWebsocket.subscribe(['position', 'execution', 'trade']);
 
 // and/or subscribe to individual topics on demand
 
 // Optional: Listen to websocket connection open event (automatic after subscribing to one or more topics)
-ws.on('open', ({ wsKey, event }) => {
-  console.log('connection open for websocket with ID: ' + wsKey);
+linearWebsocket.on('open', ({ linearWebsocketKey, event }) => {
+  console.log('connection open for websocket with ID: ' + linearWebsocketKey);
 });
 
 // Optional: Listen to responses to websocket queries (e.g. the response after subscribing to a topic)
-ws.on('response', response => {
+linearWebsocket.on('response', response => {
   console.log('response', response);
 });
 
 // Optional: Listen to connection close event. Unexpected connection closes are automatically reconnected.
-ws.on('close', () => {
+linearWebsocket.on('close', () => {
   console.log('connection closed');
 });
 
 // Optional: Listen to raw error events. Recommended.
-ws.on('error', err => {
+linearWebsocket.on('error', err => {
   console.error('error', err);
 });
 
-const client = new LinearClient({
+const linearApi = new LinearClient({
   key: '',
   secret: '',
   testnet: false
@@ -82,4 +82,4 @@ const client = new LinearClient({
 // For public-only API calls, simply don't provide a key & secret or set them to undefined
 // const client = new InverseClient({});
 
-export { ws as bybitWS, client as bybitClient };
+export { linearWebsocket, linearApi };

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { validationResult } from 'express-validator';
-import { bybitClient } from '../bybit.js';
+import DataProviderFactory from '../dataProviders/dataProviderFactory.js';
 import PriceAlerts from '../models/PriceAlerts/PriceAlerts.js';
 
 export async function createAlert(req, res) {
@@ -9,7 +9,8 @@ export async function createAlert(req, res) {
   try {
     validationResult(req).throw();
     // TODO: get exchange and market types
-    const response = await bybitClient.getIndexPriceKline({ symbol: req.body.symbol, interval: 1, from: dayjs().unix() - 60, limit: 1 })
+    const apiDataProvider = DataProviderFactory.get({ name: req.body.provider, marketType: req.body.market, instanceType: 'api' });
+    const response = await apiDataProvider.getIndexPriceKline({ symbol: req.body.symbol, interval: 1, from: dayjs().unix() - 60, limit: 1 })
     const createdPrice = parseFloat(response.result[0].close);
     const alert = {
       symbol: req.body.symbol,
@@ -19,7 +20,7 @@ export async function createAlert(req, res) {
       market: req.body.market,
       emailAddress: req.body.email
     };
-    alert.direction = alert.createdPrice > alert.alertPrice ? "down" : "up";
+    alert.direction = alert.createdPrice > alert.alertPrice ? 'down' : 'up';
 
     console.log(alert);
     await PriceAlerts.create(alert);

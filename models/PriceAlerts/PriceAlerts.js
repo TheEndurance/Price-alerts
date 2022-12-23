@@ -1,19 +1,30 @@
 import mongoose from 'mongoose';
 const PriceAlertSchema = new mongoose.Schema({
-  createdPrice: Number,
-  alertPrice: Number,
-  direction: String,
-  emailAddress: String,
+  createdPrice: {
+    type: Number,
+    required: true
+  },
+  alertPrice: {
+    type: Number,
+    required: true
+  },
+  direction: {
+    type: String,
+    required: true
+  },
   provider: {
     type: String,
-    enum: ['bybit', 'coinbase', 'binance'],
-    default: 'bybit'
+    required: true
   },
   market: {
     type: String,
-    enum: ['linear', 'spot', 'inverse'],
-    default: 'linear'
-  }
+    required: true
+  },
+  symbol: {
+    type: String,
+    required: true
+  },
+  emailAddress: String, // TODO: replace this with user information
 });
 
 const PriceAlerts = mongoose.model("PriceAlerts", PriceAlertSchema);

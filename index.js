@@ -1,14 +1,15 @@
 import dayjs from 'dayjs';
-import { bybitWS, bybitClient } from './bybit.js';
 import "./server.js";
+import DataProviderFactory from './dataProviders/dataProviderFactory.js';
 import { sendEmailAlert } from './email.js';
 import PriceAlerts from './models/PriceAlerts/PriceAlerts.js';
 
-bybitWS.subscribe('candle.1.BTCUSDT');
-bybitWS.subscribe('candle.1.ETHUSDT');
+const bybitLinearWebsocket = DataProviderFactory.get({ name: 'bybit', marketType: 'linear', instanceType: 'websocket'});
+bybitLinearWebsocket.subscribe('candle.1.BTCUSDT');
+bybitLinearWebsocket.subscribe('candle.1.ETHUSDT');
 
 // Listen to events coming from websockets. This is the primary data source
-bybitWS.on('update', data => {
+bybitLinearWebsocket.on('update', data => {
   // console.log('update', data);
   if (data.wsKey === "linearPublic") {
     const close = data.data[0].close
