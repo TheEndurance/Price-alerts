@@ -22,30 +22,10 @@
 </div>
 <script>
   $(document).ready(function(){
-    const eventHandlers = {
-      ["{{providers.id}}"] : {
-      containerSelector: "#{{markets.id}}Container",
-      childDependentSelects: [{
-        containerSelector: "#{{symbols.id}}Container",
-        selectTemplateContext: {
-          label: "{{symbols.label}}",
-          id: "{{symbols.id}}",
-          name: "{{symbols.name}}",
-          blankOptionDisplay: "{{symbols.blankOptionDisplay}}"
-        }
-      }],
-      selectTemplateContext: {
-        label: "{{markets.label}}",
-        id: "{{markets.id}}",
-        name: "{{markets.name}}",
-        blankOptionDisplay: "{{markets.blankOptionDisplay}}"
-      },
-      templateName: "select",
-      apiUrlFn: (provider) => {
-        return `${window.location.origin}/markets/${provider}`;
-      }
-    },
-      ["{{markets.id}}"]: {
+    $('select#{{symbols.id}}').select2({
+      theme: 'bootstrap-5'
+    });
+    const symbolSelect = {
       containerSelector: "#{{symbols.id}}Container",
       selectTemplateContext: {
         label: "{{symbols.label}}",
@@ -58,13 +38,35 @@
         const provider = $("#{{providers.id}}").find("option:selected").attr('value');
         console.log(`${window.location.origin}/symbols/${provider}/${marketType}`);
         return `${window.location.origin}/symbols/${provider}/${marketType}`;
+      },
+      afterRender: () => {
+        $('select#{{symbols.id}}').select2({
+          theme: 'bootstrap-5'
+        });
       }
-    }
+    };
+    const marketSelect = {
+      containerSelector: "#{{markets.id}}Container",
+      childDependentSelects: [symbolSelect],
+      selectTemplateContext: {
+        label: "{{markets.label}}",
+        id: "{{markets.id}}",
+        name: "{{markets.name}}",
+        blankOptionDisplay: "{{markets.blankOptionDisplay}}"
+      },
+      templateName: "select",
+      apiUrlFn: (provider) => {
+        return `${window.location.origin}/markets/${provider}`;
+      }
+    };
+    const eventHandlers = {
+      ["{{providers.id}}"] : marketSelect,
+      ["{{markets.id}}"]: symbolSelect
     };
     $("#createAlertForm").change(function(event) {
       const target = event.target;
       if ( eventHandlers[target.id]) {
-        const { containerSelector, selectTemplateContext, childDependentSelects, templateName, apiUrlFn } = eventHandlers[target.id];
+        const { containerSelector, selectTemplateContext, childDependentSelects, templateName, apiUrlFn, afterRender } = eventHandlers[target.id];
         selectTemplateContext.loading = true;
         selectTemplateContext.options = [];
         const emptySelectHtml = Handlebars.templates[templateName](selectTemplateContext);
@@ -72,10 +74,13 @@
 
         if (Array.isArray(childDependentSelects)) {
           childDependentSelects.forEach((select) => {
-            const { containerSelector: depContainerSelector, selectTemplateContext: depSelectTemplateContext } = select;
+            const { containerSelector: depContainerSelector, selectTemplateContext: depSelectTemplateContext, afterRender: depSelectAfterRender } = select;
             depSelectTemplateContext.options = [];
             const depSelectHtml = Handlebars.templates[templateName](depSelectTemplateContext);
             $(depContainerSelector).html(depSelectHtml);
+            if (depSelectAfterRender) {
+              depSelectAfterRender();
+            }
           });
         } 
         
@@ -87,6 +92,9 @@
           selectTemplateContext.loading = false;
           const selectHtml = Handlebars.templates[templateName](selectTemplateContext);
           $(containerSelector).html(selectHtml);
+          if (afterRender) {
+            afterRender();
+          }
         });
       }
     });

@@ -5,7 +5,7 @@ const MarketSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  label: {
+  display: {
     type: String
   }
 });

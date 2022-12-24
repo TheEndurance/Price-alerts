@@ -1,6 +1,18 @@
 .select-container {
   position: relative;
 }
+#createAlertForm select {
+  min-height: calc(1.5em + .75rem + 2px);
+  border-radius: 0.25rem;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
+#createAlertForm input {
+  min-height: calc(1.5em + .75rem + 2px);
+  border-radius: 0.25rem;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
 .select-loading-spinner {
   position: absolute;
   bottom: 0;
