@@ -1,9 +1,9 @@
-import { WebsocketClient, InverseClient, LinearClient } from 'bybit-api';
+import { WebsocketClient, InverseClient, LinearClient, SpotClientV3 } from 'bybit-api';
 
 const API_KEY = '';
 const PRIVATE_KEY = '';
 
-const linearlinearWebsocketConfig = {
+const linearWebsocketConfig = {
   key: API_KEY,
   secret: PRIVATE_KEY,
 
@@ -43,43 +43,35 @@ const linearlinearWebsocketConfig = {
   // override which URL to use for websocket connections
   // linearWebsocketUrl: 'linearWebsockets://stream.bytick.com/realtime'
 };
+const inverseWebsocketConfig = {
+  key: API_KEY,
+  secret: PRIVATE_KEY,
+  market: 'inverse'
+};
+const spotWebsocketConfig = {
+  key: API_KEY,
+  secret: PRIVATE_KEY,
+  market: 'spotv3'
+};
 
-const linearWebsocket = new WebsocketClient(linearlinearWebsocketConfig);
-
-// subscribe to multiple topics at once
-// linearWebsocket.subscribe(['position', 'execution', 'trade']);
-
-// and/or subscribe to individual topics on demand
-
-// Optional: Listen to websocket connection open event (automatic after subscribing to one or more topics)
-linearWebsocket.on('open', ({ linearWebsocketKey, event }) => {
-  console.log('connection open for websocket with ID: ' + linearWebsocketKey);
-});
-
-// Optional: Listen to responses to websocket queries (e.g. the response after subscribing to a topic)
-linearWebsocket.on('response', response => {
-  console.log('response', response);
-});
-
-// Optional: Listen to connection close event. Unexpected connection closes are automatically reconnected.
-linearWebsocket.on('close', () => {
-  console.log('connection closed');
-});
-
-// Optional: Listen to raw error events. Recommended.
-linearWebsocket.on('error', err => {
-  console.error('error', err);
-});
+const linearWebsocket = new WebsocketClient(linearWebsocketConfig);
+const inverseWebsocket = new WebsocketClient(inverseWebsocketConfig);
+const spotWebsocket = new WebsocketClient(spotWebsocketConfig);
 
 const linearApi = new LinearClient({
   key: '',
   secret: '',
   testnet: false
-},
-  // requestLibraryOptions
-);
+});
+const inverseApi = new InverseClient({
+  key: '',
+  secret: '',
+  testnet: false
+});
+const spotApi = new SpotClientV3({
+  key: '',
+  secret: '',
+  testnet: false
+});
 
-// For public-only API calls, simply don't provide a key & secret or set them to undefined
-// const client = new InverseClient({});
-
-export { linearWebsocket, linearApi };
+export { linearWebsocket, inverseWebsocket, spotWebsocket, linearApi, inverseApi, spotApi };

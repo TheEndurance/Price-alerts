@@ -2,12 +2,46 @@ import dayjs from 'dayjs';
 import { validationResult } from 'express-validator';
 import DataProviderFactory from '../dataProviders/dataProviderFactory.js';
 import PriceAlerts from '../models/PriceAlerts/PriceAlerts.js';
+import _ from 'lodash';
+
+const providers = {
+  label: 'Providers',
+  id: 'provider',
+  name: 'provider',
+  loading: false,
+  blankOptionDisplay: "Select a provider",
+  options: [{
+    display: 'Bybit',
+    value: 'bybit'
+  },
+  {
+    display: "Binance",
+    value: "binance"
+  }
+  ]
+};
+const markets = {
+  label: 'Market Type',
+  id: 'market',
+  name: 'market',
+  loading: false,
+  blankOptionDisplay: "Select a market type",
+  options: []
+};
+const symbols = {
+  label: 'Ticker',
+  id: 'symbol',
+  name: 'symbol',
+  loading: false,
+  blankOptionDisplay: "Select a ticker",
+  options: []
+};
 
 export async function createAlert(req, res) {
   // On post request
   console.log("in post", req.body);
   try {
-    validationResult(req).throw();
+    const errors = await validationResult(req).throw();
     // TODO: get exchange and market types
     const apiDataProvider = DataProviderFactory.get({ name: req.body.provider, marketType: req.body.market, instanceType: 'api' });
     const response = await apiDataProvider.getIndexPriceKline({ symbol: req.body.symbol, interval: 1, from: dayjs().unix() - 60, limit: 1 })
@@ -24,45 +58,23 @@ export async function createAlert(req, res) {
 
     console.log(alert);
     await PriceAlerts.create(alert);
+    return res.json({
+      success: {
+        message: `Alert for ${req.body.symbol} successfully created`
+      }
+    });
 
   } catch (err) {
-    res.status(400).json();
+    console.log("rendering with:", err.array());
+    return res.json({
+      errors: err.array()
+    });
+    // console.log(err.mapped());
+    // console.log(err.array());
   }
 }
 
 export async function viewAlertForm(req, res) {
-  const providers = {
-    label: 'Providers',
-    id: 'provider',
-    name: 'provider',
-    loading: false,
-    blankOptionDisplay: "Select a provider",
-    options: [{
-      display: 'Bybit',
-      value: 'bybit'
-    },
-    {
-      display: "Binance",
-      value: "binance"
-    }
-    ]
-  };
-  const markets = {
-    label: 'Market Type',
-    id: 'market',
-    name: 'market',
-    loading: false,
-    blankOptionDisplay: "Select a market type",
-    options: []
-  };
-  const symbols = {
-    label: 'Ticker',
-    id: 'symbol',
-    name: 'symbol',
-    loading: false,
-    blankOptionDisplay: "Select a ticker",
-    options: []
-  }
    res.render('home', {
      providers,
      markets,

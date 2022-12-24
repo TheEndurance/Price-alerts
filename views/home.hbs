@@ -1,4 +1,8 @@
 <div class="row">
+  <div id="success"></div>
+  <div id="errors"></div>
+<!--   {{> errorList errors}}
+  {{> successMessage success}} -->
   <div class="d-flex justify-content-center">
     <form method="POST" action="/" id="createAlertForm">
       <fieldset>
@@ -22,6 +26,29 @@
 </div>
 <script>
   $(document).ready(function(){
+    $('#createAlertForm').submit(function(e) {
+      $.ajax({
+        type: 'post',
+        url: window.location.origin,
+        data: $('#createAlertForm').serialize()
+      }).done((data) => {
+        if (data.errors) {
+          const errorListHtml = Handlebars.templates['errorList']({
+            errors: data.errors
+          });
+          $("#errors").html(errorListHtml);
+        }
+        else if (data.success) {
+          const successMessageHtml = Handlebars.templates['successMessage'](data.success);
+          $("#success").html(successMessageHtml);
+          $("#errors").empty();
+        }
+      }).fail((err) => {
+        alert(err);
+        console.log(err);
+      });
+      e.preventDefault();
+    });
     $('select#{{symbols.id}}').select2({
       theme: 'bootstrap-5'
     });
@@ -71,7 +98,6 @@
         selectTemplateContext.options = [];
         const emptySelectHtml = Handlebars.templates[templateName](selectTemplateContext);
         $(containerSelector).html(emptySelectHtml);
-
         if (Array.isArray(childDependentSelects)) {
           childDependentSelects.forEach((select) => {
             const { containerSelector: depContainerSelector, selectTemplateContext: depSelectTemplateContext, afterRender: depSelectAfterRender } = select;
@@ -83,11 +109,9 @@
             }
           });
         } 
-        
         const selectedValue = $(target).find("option:selected").attr('value');
         const apiUrl = apiUrlFn(selectedValue);
         $.get(apiUrl, (data, status) => {
-      
           selectTemplateContext.options = data.options;
           selectTemplateContext.loading = false;
           const selectHtml = Handlebars.templates[templateName](selectTemplateContext);
