@@ -1,9 +1,9 @@
-import DataProviderFactory from './dataProviders/dataProviderFactory.js';
+import DataProviderFactory from './dataProviders/DataProviderFactory.js';
 import { bybitLinearWebsocketEventHandler } from './websocketEventHandlers/bybit/eventHandlers.js';
 
-const bybitLinearWebsocket = DataProviderFactory.get({ name: 'bybit', marketType: 'linear', instanceType: 'websocket'});
+const bybitLinearWebsocketDataProvider = DataProviderFactory.get({ providerName: 'bybit', marketType: 'linear', instanceType: 'websocket'});
 
-bybitLinearWebsocket.on('update', data => {
+bybitLinearWebsocketDataProvider.on('update', data => {
   bybitLinearWebsocketEventHandler(data);
 });
 

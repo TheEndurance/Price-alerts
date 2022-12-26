@@ -12,14 +12,17 @@
         {{> select symbols}}
         <div class="form-group">
           <label for="alertprice" class="form-label mt-4">Alert Price</label>
-          <input type="number" class="form-control" id="alertprice" name="alertprice">
+          <input type="number" class="form-control" id="alertprice" name="alertprice" step="any">
         </div>
         <div class="form-group">
           <label for="email" class="form-label mt-4">Email address</label>
           <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter email">
           <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="d-flex">
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <div id="formSubmitLoader" class="select-loading-spinner spinner-border text-info ms-2 mt-1"></div>
+        </div>
       </fieldset>
     </form>  
   </div>
@@ -27,6 +30,7 @@
 <script>
   $(document).ready(function(){
     $('#createAlertForm').submit(function(e) {
+      $("#formSubmitLoader").show();
       $.ajax({
         type: 'post',
         url: window.location.origin,
@@ -34,7 +38,8 @@
       }).done((data) => {
         if (data.errors) {
           const errorListHtml = Handlebars.templates['errorList']({
-            errors: data.errors
+            errors: data.errors,
+            headingMsg: 'Submission error!'
           });
           $("#errors").html(errorListHtml);
         }
@@ -46,6 +51,8 @@
       }).fail((err) => {
         alert(err);
         console.log(err);
+      }).always(() => {
+        $("#formSubmitLoader").hide();
       });
       e.preventDefault();
     });

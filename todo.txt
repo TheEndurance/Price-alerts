@@ -1,12 +1,12 @@
 ---------- TODO ----------
 
 - add other providers
+- subscribe and unsubscirbe to websocket symbols on alert creation and deletion
 - fire alerts based off provider, market type and ticker
-- form validation
-- error messages for the alerts form
 - user signup/login - auth
 - manage/view existing alerts
 - sms 
+- form sanitizers
 
 
 ----------- DONE -----------
@@ -14,3 +14,5 @@
 - create generic provider factory to abstract specific details of a provider
 - fetch providers for select
 - fetch market types from selected providers
+- form validation
+- error messages for the alerts form

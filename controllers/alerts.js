@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { validationResult } from 'express-validator';
-import DataProviderFactory from '../dataProviders/dataProviderFactory.js';
+import DataProviderFactory from '../dataProviders/DataProviderFactory.js';
 import PriceAlerts from '../models/PriceAlerts/PriceAlerts.js';
 import _ from 'lodash';
 
@@ -41,11 +41,10 @@ export async function createAlert(req, res) {
   // On post request
   console.log("in post", req.body);
   try {
-    const errors = await validationResult(req).throw();
+    validationResult(req).throw();
     // TODO: get exchange and market types
-    const apiDataProvider = DataProviderFactory.get({ name: req.body.provider, marketType: req.body.market, instanceType: 'api' });
-    const response = await apiDataProvider.getIndexPriceKline({ symbol: req.body.symbol, interval: 1, from: dayjs().unix() - 60, limit: 1 })
-    const createdPrice = parseFloat(response.result[0].close);
+    const apiDataProvider = DataProviderFactory.get({ providerName: req.body.provider, marketType: req.body.market, instanceType: 'api' });
+    const createdPrice = await apiDataProvider.getLatestPrice(req.body.symbol);
     const alert = {
       symbol: req.body.symbol,
       createdPrice,
@@ -58,19 +57,12 @@ export async function createAlert(req, res) {
 
     console.log(alert);
     await PriceAlerts.create(alert);
-    return res.json({
-      success: {
-        message: `Alert for ${req.body.symbol} successfully created`
-      }
-    });
-
+    // TODO do we need to do anything with the res here?
   } catch (err) {
-    console.log("rendering with:", err.array());
-    return res.json({
-      errors: err.array()
-    });
+    // TODO do we need to do anything with the res here?
     // console.log(err.mapped());
     // console.log(err.array());
+    console.log("post error: ", err);
   }
 }
 
