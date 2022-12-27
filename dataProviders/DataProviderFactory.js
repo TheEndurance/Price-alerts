@@ -3,8 +3,8 @@ import {
   inverseApi as bybitInverseApi,
   spotApi as bybitSpotApi,
   linearWebsocket as bybitLinearWebsocket,
-  // inverseWebsocket as bybitInverseWebsocket,
-  // spotWebsocket as bybitSpotWebsocket
+  inverseWebsocket as bybitInverseWebsocket,
+  spotWebsocket as bybitSpotWebsocket
 } from './bybit/bybit.js';
 
 import ApiDataProvider from './ApiDataProvider.js';
@@ -34,7 +34,7 @@ DataProviderFactory.get = (params) => {
   const { providerName, marketType, instanceType } = params;
   const key = DataProviderFactory.makeKey(providerName, marketType, instanceType);
   if (!DataProviderFactory.PROVIDERS[key]) {
-    throw new Error("invalid provider");
+    throw new Error("invalid provider with key: " + key);
   }
   return DataProviderFactory.PROVIDERS[key];
 }
@@ -50,12 +50,13 @@ DataProviderFactory.register(bybitLinearApiDataProvider);
 DataProviderFactory.register(bybitInverseApiDataProvider);
 DataProviderFactory.register(bybitSpotApiDataProvider);
 
-const bybitLinearWebsocketProvider = new WebsocketDataProvider(bybitLinearWebsocket, { providerName: "bybit", marketType: "linear" });
+const bybitLinearWebsocketProvider = new WebsocketDataProvider(bybitLinearWebsocket, { providerName: 'bybit', marketType: 'linear' });
+const bybitInverseWebsocketProvider = new WebsocketDataProvider(bybitInverseWebsocket, { providerName: 'bybit', marketType: 'inverse'});
+const bybitSpotWebsocketProvider = new WebsocketDataProvider(bybitSpotWebsocket, { providerName: 'bybit', marketType: 'spotv3'});
 
 DataProviderFactory.register(bybitLinearWebsocketProvider);
-// DataProviderFactory.register({ providerName : "bybit", marketType: "inverse", instanceType: "websocket" }, bybitInverseWebsocket);
-// DataProviderFactory.register({ providerName : "bybit", marketType: "spot", instanceType: "websocket" }, bybitSpotWebsocket);
-
+DataProviderFactory.register(bybitInverseWebsocketProvider);
+DataProviderFactory.register(bybitSpotWebsocketProvider);
 //binance
 
 

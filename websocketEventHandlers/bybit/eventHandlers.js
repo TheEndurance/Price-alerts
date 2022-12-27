@@ -1,11 +1,14 @@
+import DataProviderFactory from '../../dataProviders/DataProviderFactory.js';
 import PriceAlerts from '../../models/PriceAlerts/PriceAlerts.js';
 import { sendEmailAlert } from '../../email.js';
 
-async function bybitLinearWebsocketEventHandler(data) {
+async function updateEventHandler(data, options = {}) {
+  const { providerName, marketType } = options
   const close = data.data[0].close
   const symbol = data.topic.split(".")[2];
-  const alerts =  await PriceAlerts.find({ market: "linear", provider: "bybit", symbol }).exec();
-  alerts.forEach(async (alert) => {
+  const alerts =  await PriceAlerts.find({ market: marketType, provider: providerName, symbol }).exec();
+  const symbolDeletedMap = {};
+  for (const alert of alerts) {
     let fired = false;
     if (alert.direction === "down" && close <= alert.alertPrice) {
       console.warn("ALERT FIRED");
@@ -17,7 +20,8 @@ async function bybitLinearWebsocketEventHandler(data) {
     }
     if (fired) {
       try {
-        await PriceAlerts.deleteOne({ _id: alert._id })
+        await PriceAlerts.deleteOne({ _id: alert._id });
+        symbolDeletedMap[alert.symbol] = true;
         sendEmailAlert(alert).catch((err) => console.error(err));
         console.log("alert deleted: ", alert);
       }
@@ -25,7 +29,17 @@ async function bybitLinearWebsocketEventHandler(data) {
         console.error(e);
       }
     }
-  });
+  }
+
+  // potential race condition situation with deleting a sub and creating a sub ?
+  const websocketDataProvider = DataProviderFactory.get({ marketType, providerName, instanceType: 'websocket' });
+  const symbols = Object.keys(symbolDeletedMap);
+  for (const symbol of symbols) {
+   const alertsCount = await PriceAlerts.countDocuments({ market: marketType, provider: providerName, symbol}).exec();
+    if (alertsCount === 0) {
+      websocketDataProvider.deletePriceUpdateSub(symbol);
+    } 
+  }
 }
 
-export { bybitLinearWebsocketEventHandler };
+export { updateEventHandler };

@@ -4,6 +4,8 @@ import DataProviderFactory from '../dataProviders/DataProviderFactory.js';
 import PriceAlerts from '../models/PriceAlerts/PriceAlerts.js';
 import _ from 'lodash';
 
+
+// TODO: this should be retrieved from database
 const providers = {
   label: 'Providers',
   id: 'provider',
@@ -57,12 +59,27 @@ export async function createAlert(req, res) {
 
     console.log(alert);
     await PriceAlerts.create(alert);
-    // TODO do we need to do anything with the res here?
+
+    const websocketDataProvider = DataProviderFactory.get({ providerName: req.body.provider, marketType: req.body.market, instanceType: 'websocket' });
+
+    const subExists = websocketDataProvider.isSubbed(req.body.symbol);
+    if (!subExists) {      
+      websocketDataProvider.createPriceUpdateSub(req.body.symbol);
+    }
+    res.json({
+      success: {
+        message: `Alert for ${req.body.symbol} successfully created`
+      }
+    });
   } catch (err) {
-    // TODO do we need to do anything with the res here?
     // console.log(err.mapped());
     // console.log(err.array());
-    console.log("post error: ", err);
+    const errors = err.array ? err.array() : [ { msg: `Server error - ${err.message}` } ];
+    res.json({
+      errors: {
+        errors
+      }
+    });
   }
 }
 

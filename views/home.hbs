@@ -1,8 +1,6 @@
 <div class="row">
   <div id="success"></div>
   <div id="errors"></div>
-<!--   {{> errorList errors}}
-  {{> successMessage success}} -->
   <div class="d-flex justify-content-center">
     <form method="POST" action="/" id="createAlertForm">
       <fieldset>
@@ -50,7 +48,7 @@
         }
       }).fail((err) => {
         alert(err);
-        console.log(err);
+        console.log(JSON.stringify(err));
       }).always(() => {
         $("#formSubmitLoader").hide();
       });

@@ -1,9 +1,19 @@
 import DataProviderFactory from './dataProviders/DataProviderFactory.js';
-import { bybitLinearWebsocketEventHandler } from './websocketEventHandlers/bybit/eventHandlers.js';
+import { updateEventHandler } from './websocketEventHandlers/bybit/eventHandlers.js';
 
-const bybitLinearWebsocketDataProvider = DataProviderFactory.get({ providerName: 'bybit', marketType: 'linear', instanceType: 'websocket'});
+const websocketProviderMarketTypeMaps = {
+  bybit: ['linear','inverse','spotv3']
+}
 
-bybitLinearWebsocketDataProvider.on('update', data => {
-  bybitLinearWebsocketEventHandler(data);
-});
+const providerNames = Object.keys(websocketProviderMarketTypeMaps)
+for (const providerName of providerNames) {
+  const marketTypes = websocketProviderMarketTypeMaps[providerName];
+  for (const marketType of marketTypes) {
+    const websocketDataProvider = DataProviderFactory.get({ providerName, marketType, instanceType: 'websocket'});
+    websocketDataProvider.on('update', data => {
+      updateEventHandler(data);
+    })
+  }
+}
+
 
